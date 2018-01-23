@@ -1,5 +1,5 @@
 {
-  "name": "fetch big files concurrent test",
+  "name": "fetch big files concurrent stream body to nowhere test",
   "description": "Test Chrome App.",
   "version": "0.2",
   "manifest_version": 2,
