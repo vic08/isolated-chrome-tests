@@ -1,9 +1,6 @@
 const constants = require('../../../lib/constants')
 const FILES_NUMBER = 20000
-
-function getNextFileUrl() {
-  return `${constants.DUMMY_FILE_SERVER_URL}/test?size=${1024 * 1024 * (300 + Math.round(Math.random() * 20))}`
-}
+const CONCURRENT_NUMBER = 10
 
 function exerciseFetch() {
   return new Promise((resolve, reject) => {
@@ -17,9 +14,16 @@ function exerciseFetch() {
         return resolve()
       }
 
-      return fetchFile(getNextFileUrl())
-        .then(arrayBuffer => {
-          filesLeft--
+      let i = 0
+      let urls = []
+      while (i < CONCURRENT_NUMBER) {
+        urls.push(`${constants.DUMMY_FILE_SERVER_URL}/test?size=${1024 * 1024 * (300 + Math.round(Math.random() * 20))}`)
+        i++
+      }
+
+      return Promise.all(urls.map(url => fetchFile(url)))
+        .then(arrayBuffers => {
+          filesLeft = filesLeft - CONCURRENT_NUMBER
           makeNextStep()
         })
         .catch(reject)
@@ -49,10 +53,18 @@ chrome.app.runtime.onLaunched.addListener(function() {
     }
   });
 
-  exerciseFetch()
-    .then(() => {
-      console.log(`Finished exercising fetch. Pulled ${FILES_NUMBER}`)
-    })
+  let tryExerciseFetch = () => {
+    exerciseFetch()
+      .then(() => {
+        console.log(`Finished exercising fetch. Pulled ${FILES_NUMBER}`)
+      })
+      .catch(err => {
+        console.log(`error happened while exercising fetch: ${err.message}. Restarting...`)
+        tryExerciseFetch()
+      })
+  }
+
+  tryExerciseFetch()
 });
 
 chrome.runtime.onSuspend.addListener(function() {

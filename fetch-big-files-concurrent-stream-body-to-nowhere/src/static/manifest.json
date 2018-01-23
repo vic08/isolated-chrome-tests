@@ -1,0 +1,24 @@
+{
+  "name": "fetch big files concurrent test",
+  "description": "Test Chrome App.",
+  "version": "0.2",
+  "manifest_version": 2,
+  "minimum_chrome_version": "23",
+  "app": {
+    "background": {
+      "scripts": ["background.js"]
+    }
+  },
+  "sockets": {
+    "tcp": {
+      "connect": "*:80"
+    },
+    "tcpServer": {
+      "listen": "127.0.0.1:5858"
+    }
+  },
+  "permissions": [
+    "fileSystem"
+  ],
+  "icons": { "16": "calculator-16.png", "128": "calculator-128.png" }
+}
